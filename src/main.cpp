@@ -1,8 +1,16 @@
 #include "http/server.hpp"
 #include <iostream>
 
-void callback(void) {
-	std::cout << "Received connection!" << std::endl;
+void callback(const http::request& request, http::response& response) {
+	response.status(404);
+
+	response << "<!doctype html>"
+		<< "<html><title>hello</title>"
+		<< "<body><p>";
+	if ( request.path == "/" )
+		response << "Hello there!";
+	else
+		response << "Hello " << request.path.substr(1);
 }
 
 

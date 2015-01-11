@@ -1,5 +1,6 @@
 #include "utils.hpp"
 #include "request.hpp"
+#include "response.hpp"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -170,6 +171,7 @@ request get_request(int socket) {
 void process_request(int socket, server::callback_type cb){
 	std::clog << "Connection stabilished (socket id: " << socket << ")" << std::endl;
 	request req;
+	response resp;
 	try {
 		req = get_request(socket);
 	} catch ( runtime_error e ) {
@@ -207,7 +209,9 @@ void process_request(int socket, server::callback_type cb){
 	for ( auto it = headers.begin(); it != headers.end(); ++it )
 		std::cout << it->first << ":" << it->second << std::endl;
 
-	cb();
+	cb(req, resp);
+
+	resp.write(socket);
 }
 
 } // namespace utils

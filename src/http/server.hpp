@@ -5,6 +5,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include "runtime_error.hpp"
+#include "request.hpp"
+#include "response.hpp"
 #define DEFAULT_MAX_CONNECTIONS 1024
 
 namespace http {
@@ -15,7 +17,7 @@ class server {
 	uint max_connections_;
 public:
 	typedef uint port_type;
-	typedef void (*callback_type)(void);
+	typedef void (*callback_type)(const request&, response&);
 	server(const std::string&, uint max_connections) throw(runtime_error);
 	server(const std::string& s) : server(s, DEFAULT_MAX_CONNECTIONS) {};
 	server() : server(".") {};
