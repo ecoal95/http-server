@@ -1,14 +1,19 @@
 #include "response.hpp"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <cstring>
-#define SEND_STATIC(socket, string) send(socket, string, strlen(string), 0);
 #include <iostream>
+#include <socketutils/socketutils.hpp>
 
+#include "runtime_error.hpp"
+
+using socketutils::safe_send;
+
+#define SEND_STATIC(socket, string) safe_send(socket, string, strlen(string), 0);
 
 namespace http {
-
 std::map<int, const char *> response::statuses = {
 	{100, "Continue"},
 	{101, "Switching Protocols"},
@@ -49,10 +54,10 @@ std::map<int, const char *> response::statuses = {
 	{505, "HTTP Version not supported"}
 };
 
-void response::write(int socket) {
+void response::write_to(int socket, bool close_at_end) {
 	std::string body = body_.str();
 	SEND_STATIC(socket, "HTTP/1.1 ");
-	send(socket, std::to_string(status_).c_str(), 3, 0);
+	safe_send(socket, std::to_string(status_).c_str(), 3, 0);
 	SEND_STATIC(socket, " ");
 	SEND_STATIC(socket, response::statuses[status_]);
 	SEND_STATIC(socket, "\r\n");
@@ -63,18 +68,19 @@ void response::write(int socket) {
 		headers_["Content-Type"] = "text/html";
 
 	for ( auto it = headers_.begin(); it != headers_.end(); ++it ) {
-		send(socket, it->first.c_str(), it->first.size(), 0);
+		safe_send(socket, it->first.c_str(), it->first.size(), 0);
 		SEND_STATIC(socket, ": ");
-		send(socket, it->second.c_str(), it->second.size(), 0);
+		safe_send(socket, it->second.c_str(), it->second.size(), 0);
 		SEND_STATIC(socket, "\r\n");
 		std::clog << it->first << ": " << it->second << std::endl;
 	}
 	SEND_STATIC(socket, "\r\n");
 
 	std::clog << body << std::endl;
-	send(socket, body.c_str(), body.size(), 0);
+	safe_send(socket, body.c_str(), body.size(), 0);
 
-	close(socket);
+	if ( close_at_end )
+		close(socket);
 }
 
-}
+} // namespace http

@@ -1,9 +1,7 @@
 #ifndef __HTTP_SERVER_HPP
 #define __HTTP_SERVER_HPP
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <socketutils/socketutils.hpp>
 #include "runtime_error.hpp"
 #include "request.hpp"
 #include "response.hpp"
@@ -24,6 +22,9 @@ public:
 
 	server& listen(port_type);
 	void receive(callback_type cb);
+private:
+	static void serve_file(response& resp, std::string& file_name, int socket);
+	void process_request(int new_socket, callback_type cb);
 };
 
 } // namespace http

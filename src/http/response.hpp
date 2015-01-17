@@ -14,18 +14,31 @@ class response {
 public:
 	response() : status_(200) {};
 
+	/**
+	 * Add content to the response
+	 *  allow chaining of operator<<
+	 */
 	template<typename T>
 	response& operator<<(const T& obj) { body_ << obj; return *this; }
 
-	void status(int status) { status_ = status; }
+	/** Get status */
 	int  status() const { return status_; }
 
+	/** Set status */
+	void status(int status) { status_ = status; }
+
+	/** Discard current response */
 	void discard() { body_.str(""); }
 
-	void header(const std::string& key, std::string& val) { headers_[key] = val; }
-	const std::string& header(const std::string& key) { return headers_[key]; }
+	/** Add or set a response header */
+	void header(const std::string& key, const std::string& val)       { headers_[key] = val; }
 
-	void write(int socket);
+	/** Get a response header */
+	const std::string& header(const std::string& key)           { return headers_[key]; }
+
+	/** Write response to a socket */
+	void write(int socket, bool close_at_end = true) { write_to(socket, close_at_end); } // alias
+	void write_to(int socket, bool close_at_end = true);
 
 };
 

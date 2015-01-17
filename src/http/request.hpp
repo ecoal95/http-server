@@ -9,6 +9,11 @@ struct request {
 	std::string protocol;
 	std::map<std::string, std::string> headers;
 	std::string body;
+
+	request(int socket) : socket_(socket) { parse(); };
+private:
+	void parse(); // Fill request body with contents from socket
+	int socket_;
 };
 
 } // namespace http
