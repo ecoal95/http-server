@@ -104,7 +104,7 @@ void server::serve_file(response& resp, std::string& file_name, int socket) {
 	std::clog << "Serving file: " << file_name << std::endl;
 	resp.header("Content-Type", "text/plain"); // TODO
 	resp.write_to(socket, false); // don't close (yet)
-	utils::write_file(file_name.c_str(), socket);
+	utils::write_file(file_name.c_str(), socket); // TODO: this doesn't display because of content-length header... fix
 	close(socket);
 }
 

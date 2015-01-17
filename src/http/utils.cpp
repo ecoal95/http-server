@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <socketutils/socketutils.hpp>
 
 #define REQUEST_HEADER_LINE_MAX_SIZE 1024
 #define RESPONSE_STATIC_CHUNK_SIZE 1024
@@ -102,6 +103,7 @@ void write_file(const char *file_name, int socket) {
 		throw runtime_error("File could not be read.");
 
 	while ( (read = fread(buffer, 1, RESPONSE_STATIC_CHUNK_SIZE, file)) ) {
+		std::clog << "Read " << read << " bytes: " << buffer << std::endl;
 		socketutils::safe_send(socket, buffer, read, 0);
 	}
 }

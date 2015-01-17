@@ -1,4 +1,5 @@
 #include "socketutils.hpp"
+#include <iostream>
 
 namespace socketutils {
 
