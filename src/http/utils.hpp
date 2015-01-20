@@ -15,14 +15,6 @@ constexpr unsigned int const_hash(const char *s, int off = 0) {
     return !s[off] ? 5381 : (const_hash(s, off+1)*33) ^ s[off];
 }
 
-bool file_exists(const char *name);
-
-inline bool file_exists(const std::string& name) {
-	return file_exists(name.c_str());
-}
-
-void write_file(const char *file_name, int socket);
-
 } // namespace utils
 } // namespace http
 

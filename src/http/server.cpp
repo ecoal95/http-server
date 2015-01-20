@@ -1,17 +1,20 @@
 #include "server.hpp"
-#include "utils.hpp"
+#include "utils.hpp" // const_hash -> consider moving to... strutils?
+#include <fileutils/fileutils.hpp>
 #include <thread>
 #include <iostream>
 #include <unistd.h> // close
+
 namespace http {
 
 server::server(const std::string& root_dir, uint max_connections) throw(runtime_error)
-: root_dir_(root_dir), max_connections_(max_connections) {
+: root_dir_(fileutils::real_path(root_dir)), max_connections_(max_connections) {
 	socket_ = socket(AF_INET, SOCK_STREAM, 0);
 	if ( socket_ == -1 )
 		throw runtime_error();
 
 	std::clog << "Started server <" << this << ">:" << std::endl <<
+		"\troot: " << root_dir_ << std::endl <<
 		"\tsocket id: " << socket_ << std::endl <<
 		"\troot directory: " << root_dir_ << std::endl;
 }
@@ -77,14 +80,16 @@ void server::process_request(int socket, callback_type cb) {
 
 	std::cout << "Body: " << req.body << std::endl;
 
-
-	/** TODO: This actually searchs from the root... WTF?? */
 	std::string file_name = root_dir_ + req.path;
 
 	std::clog << "Trying " << file_name << std::endl;
 
-	if ( utils::file_exists(file_name) )
+	fileutils::file_type t = fileutils::get_file_type(file_name);
+
+	if ( t & fileutils::file_type::file  )
 		return serve_file(resp, file_name, socket);
+	// else if ( t & fileutils::file_type::dir )
+		// TODO: process dir
 
 	std::cout << req.method << " " << req.path << " " << req.protocol << std::endl;
 	auto headers = req.headers;
@@ -101,11 +106,13 @@ void server::process_request(int socket, callback_type cb) {
 }
 
 void server::serve_file(response& resp, std::string& file_name, int socket) {
-	std::clog << "Serving file: " << file_name << std::endl;
+	std::clog << "Serving file: " << file_name << " (size: " << fileutils::file_size(file_name) << ")" << std::endl;
 	resp.header("Content-Type", "text/plain"); // TODO
+	resp.header("Content-Length", std::to_string(fileutils::file_size(file_name)));
 	resp.write_to(socket, false); // don't close (yet)
-	utils::write_file(file_name.c_str(), socket); // TODO: this doesn't display because of content-length header... fix
+	fileutils::write_file(file_name.c_str(), socket); // TODO: this doesn't display because of content-length header... fix
 	close(socket);
 }
 
 } // namespace http
+

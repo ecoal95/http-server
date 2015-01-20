@@ -62,8 +62,12 @@ void response::write_to(int socket, bool close_at_end) {
 	SEND_STATIC(socket, response::statuses[status_]);
 	SEND_STATIC(socket, "\r\n");
 
-	headers_["Content-Length"] = std::to_string(body.size()); // +2 because of the las \r\n
-	headers_["Connection"] = "close";
+	if ( headers_.find("Content-Length") == headers_.end() )
+		headers_["Content-Length"] = std::to_string(body.size()); // +2 because of the las \r\n
+
+	if ( headers_.find("Connection") == headers_.end() )
+		headers_["Connection"] = "close";
+
 	if ( headers_.find("Content-Type") == headers_.end() )
 		headers_["Content-Type"] = "text/html";
 

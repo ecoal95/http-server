@@ -11,7 +11,7 @@ namespace http {
 
 class server {
 	int socket_;
-	const std::string& root_dir_;
+	std::string root_dir_;
 	uint max_connections_;
 public:
 	typedef uint port_type;

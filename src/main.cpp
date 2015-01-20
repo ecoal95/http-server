@@ -10,7 +10,7 @@ void callback(const http::request& request, http::response& response) {
 	if ( request.path == "/" )
 		response << "Hello there!";
 	else
-		response << "Hello " << request.path.substr(1);
+		response << "Hello " << request.path.substr(1) << "!!";
 }
 
 
